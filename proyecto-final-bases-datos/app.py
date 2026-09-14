@@ -118,87 +118,76 @@ def ejecutar_pruebas():
         DetalleCompra
     ])
 
-    print("========================================")
-    print(" CONECTADO A SQLITE - ADSO STEAM")
-    print("========================================")
+   
 
     genero, creado = Genero.get_or_create(
-        nombre="Plataformas"
-    )
+    nombre="Plataformas"
+)
+
+    genero2, creado = Genero.get_or_create(
+    nombre="Acción"
+)
+
+    genero3, creado = Genero.get_or_create(
+    nombre="RPG"
+)
+
+    usuario, creado = Usuario.get_or_create(
+    correo="juan@gmail.com",
+    defaults={
+        'nombre': 'Juan'
+    }
+)
+
+    usuario2, creado = Usuario.get_or_create(
+    correo="jose@gmail.com",
+    defaults={
+        'nombre': 'Jose'
+    }
+)
 
     juego, creado = Videojuego.get_or_create(
-        nombre="Super Mario Bros",
-        defaults={
-            'precio': 59.99,
-            'stock': 100,
-            'genero': genero
-        }
-    )
+    nombre="Super Mario Bros",
+    defaults={
+        'precio': 59.99,
+        'stock': 100,
+        'genero': genero
+    }
+)
 
-    print("\n[CREATE]")
-    print("Videojuego creado/verificado correctamente.")
-    print(f"Nombre: {juego.nombre}")
+    juego2, creado = Videojuego.get_or_create(
+    nombre="Minecraft",
+    defaults={
+        'precio': 89.99,
+        'stock': 50,
+        'genero': genero2
+    }
+)
 
-    print("\n[READ]")
-    print("Videojuegos registrados:")
-    for juego in Videojuego.select():
-         print(
-            f"ID: {juego.id} | "
-            f"Nombre: {juego.nombre} | "
-            f"Precio: ${juego.precio} | "
-            f"Stock: {juego.stock}"
-        )
+    juego3, creado = Videojuego.get_or_create(
+    nombre="The Witcher 3",
+    defaults={
+        'precio': 79.99,
+        'stock': 30,
+        'genero': genero3
+    }
+)
 
-    print("\n[JOIN]")
-    print("Videojuegos y sus géneros:")
+    compra, creado = Compra.get_or_create(
+    usuario=usuario,
+    defaults={
+        'total': 59.99
+    }
+)
 
-    consulta = (
-        Videojuego
-        .select(Videojuego, Genero)
-        .join(Genero)
-    )
-
-    for juego in consulta:
-
-        print(
-            f"{juego.nombre} → "
-            f"{juego.genero.nombre}"
-        )
-
-    juego_update = Videojuego.get(
-        Videojuego.nombre == "Super Mario Bros"
-    )
-
-    juego_update.precio = 49.99
-    juego_update.save()
-
-    print("\n[UPDATE]")
-    print(
-        f"Nuevo precio de {juego_update.nombre}: "
-        f"${juego_update.precio}"
-    )
-
-    juego_delete = Videojuego.get(
-        Videojuego.nombre == "Super Mario Bros"
-    )
-
-    juego_delete.delete_instance()
-
-    genero_delete = Genero.get(
-        Genero.nombre == "Plataformas"
-    )
-
-    genero_delete.delete_instance()
-
-    print("\n[DELETE]")
-    print(
-        "Videojuego y género eliminados correctamente."
-    )
-
-
-    print("\n========================================")
-    print(" PRUEBAS CRUD FINALIZADAS")
-    print("========================================")
+    detalle, creado = DetalleCompra.get_or_create(
+    compra=compra,
+    videojuego=juego,
+    defaults={
+        'cantidad': 1,
+        'precio': 59.99
+    }
+)
 
     db.close()
 
