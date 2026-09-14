@@ -1,7 +1,29 @@
 from peewee import *
 import datetime
 
-db = SqliteDatabase('adso_steam.db')
+MOTOR_ACTIVO = "sqlite"
+
+if MOTOR_ACTIVO == "sqlite":
+    db = SqliteDatabase('adso_steam.db')
+elif MOTOR_ACTIVO == "mysql":
+    db = MySQLDatabase(
+        'nombre_db',
+        user='usuario',
+        password='password',
+        host='localhost',
+        port=3306,
+        charset='utf8mb4'
+    )
+elif MOTOR_ACTIVO == "postgres" or MOTOR_ACTIVO == "postgresql":
+    db = PostgresqlDatabase(
+        'nombre_db',
+        user='usuario',
+        password='password',
+        host='127.0.0.1',
+        port=5432
+    )
+else:
+    raise ValueError("Motor de base de datos no válido")
 
 
 
@@ -191,5 +213,47 @@ def ejecutar_pruebas():
 
     db.close()
 
+
+def operaciones_crud():
+    db.connect()
+    db.create_tables([
+        Genero,
+        Videojuego,
+        Usuario,
+        Compra,
+        DetalleCompra
+    ], safe=True)
+
+    print("\n# OPERACIONES CRUD")
+
+    # CREATE
+    categoria = Genero.get_or_create(nombre="Deportes")[0]
+    producto = Videojuego.get_or_create(
+        nombre="FIFA 25",
+        defaults={
+            'precio': 450.00,
+            'stock': 20,
+            'genero': categoria
+        }
+    )[0]
+    print(f"[CREATE] Registro creado con ID: {producto.id}")
+
+    # READ
+    print("[READ] Listando videojuegos:")
+    for juego in Videojuego.select().join(Genero):
+        print(f"- {juego.nombre} | Precio: ${juego.precio} | Categoría: {juego.genero.nombre}")
+
+    # UPDATE
+    producto.precio = 485.00
+    producto.save()
+    print(f"[UPDATE] Nuevo precio de {producto.nombre}: ${producto.precio}")
+
+    # DELETE
+    producto.delete_instance()
+    print(f"[DELETE] Producto {producto.nombre} eliminado correctamente.")
+
+    db.close()
+
 if __name__ == '__main__':
     ejecutar_pruebas()
+    operaciones_crud()
